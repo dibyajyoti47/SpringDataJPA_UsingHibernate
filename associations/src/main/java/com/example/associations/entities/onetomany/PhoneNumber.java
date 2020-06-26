@@ -1,4 +1,4 @@
-package com.example.associations.entities;
+package com.example.associations.entities.onetomany;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

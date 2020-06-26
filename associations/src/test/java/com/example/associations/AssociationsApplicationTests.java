@@ -1,20 +1,29 @@
 package com.example.associations;
 
 import java.util.HashSet;
+import java.util.Set;
+
+import javax.transaction.Transactional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.example.associations.entities.Customer;
-import com.example.associations.entities.PhoneNumber;
+import com.example.associations.entities.manytomany.Programmer;
+import com.example.associations.entities.manytomany.Project;
+import com.example.associations.entities.onetomany.Customer;
+import com.example.associations.entities.onetomany.PhoneNumber;
 import com.example.associations.repositories.CustomerRepository;
+import com.example.associations.repositories.ProgrammerRepository;
 
 @SpringBootTest
 class AssociationsApplicationTests {
 	
 	@Autowired
 	private CustomerRepository repo;
+	
+	@Autowired
+	private ProgrammerRepository prepo;
 	
 	@Test
 	void testcreateCustomer() {
@@ -54,5 +63,35 @@ class AssociationsApplicationTests {
 		c.setName("Linku");
 		c.getPhoneNumbers().forEach(p -> p.setType("Cell"));
 		repo.save(c);
+	}
+	
+	@Test
+	void testm2mCreateProgrammer () {
+		Programmer pg1 = new Programmer();
+		pg1.setName("Dibyajyoti"); pg1.setSal(12000);
+		
+		Programmer pg2 = new Programmer();
+		pg2.setName("Swati"); pg2.setSal(13000);
+		
+		
+		Project pj1 = new Project();
+		pj1.setName("Pde");
+		
+		Project pj2 = new Project();
+		pj2.setName("Sizer");
+		
+		Set<Project> projects = new HashSet<Project>();
+		projects.add(pj1); projects.add(pj2);
+		
+		pg1.setProjects(projects);
+		prepo.save(pg1);
+	}
+	
+	@Test
+	@Transactional //in case of lazy loading
+	void testm2mFindProgrammer () {
+		Programmer pr = prepo.findById(2).get();
+		System.out.println(pr);
+		pr.getProjects().forEach(System.out::println);
 	}
 }
