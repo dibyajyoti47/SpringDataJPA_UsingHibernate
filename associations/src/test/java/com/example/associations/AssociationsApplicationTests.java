@@ -1,5 +1,7 @@
 package com.example.associations;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,9 +13,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.associations.entities.manytomany.Programmer;
 import com.example.associations.entities.manytomany.Project;
+import com.example.associations.entities.onetoeone.License;
+import com.example.associations.entities.onetoeone.Person;
 import com.example.associations.entities.onetomany.Customer;
 import com.example.associations.entities.onetomany.PhoneNumber;
 import com.example.associations.repositories.CustomerRepository;
+import com.example.associations.repositories.LicensceRepository;
 import com.example.associations.repositories.ProgrammerRepository;
 
 @SpringBootTest
@@ -24,6 +29,9 @@ class AssociationsApplicationTests {
 	
 	@Autowired
 	private ProgrammerRepository prepo;
+	
+	@Autowired
+	private LicensceRepository lrepo;
 	
 	@Test
 	void testcreateCustomer() {
@@ -93,5 +101,35 @@ class AssociationsApplicationTests {
 		Programmer pr = prepo.findById(2).get();
 		System.out.println(pr);
 		pr.getProjects().forEach(System.out::println);
+	}
+
+	@Test
+	void testo2ocreateLicense () {
+		License license = new License();
+		license.setType("Car");
+		Date date = new Date();
+		license.setValidFrom(date);
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		c.add(Calendar.YEAR, 5);
+		Date newDate = c.getTime();
+		license.setValidTo(newDate);
+		
+		Person person = new Person();
+		person.setFirstName("Swati");
+		person.setLastName("Samantray");
+		person.setLicense(license);
+		person.setAge(25);
+		license.setPerson(person);
+		lrepo.save(license);
+	}
+
+	@Test
+	@Transactional
+	void testCasching () { //level 1 caching
+		repo.findById(1l);
+		repo.findById(1l);
+		repo.findById(1l);
+		repo.findById(1l);
 	}
 }

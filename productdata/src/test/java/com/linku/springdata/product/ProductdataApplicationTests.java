@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
+
+import org.hibernate.Session;
 import org.hibernate.mapping.Collection;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +26,9 @@ class ProductdataApplicationTests {
 	
 	@Autowired
 	ProductRepository repository;
+	
+	@Autowired
+	private EntityManager em;
 	
 	@Test
 	void testCreate() {
@@ -125,4 +132,25 @@ class ProductdataApplicationTests {
 		Pageable pageable = PageRequest.of(0, 2, Direction.ASC, "name");
 		repository.findAll(pageable).forEach(System.out::println);
 	}
+	
+	@Test
+	@Transactional
+	void testCachingl1() { //level 1 caching
+		repository.findById(1);
+		repository.findById(1);
+		repository.findById(1);
+		//only one database call, check console 
+	}
+	
+	@Test
+	@Transactional
+	void testCachingEvict() { 
+		Session session = em.unwrap(Session.class);
+		Product product = repository.findById(1).get(); // 1st time, will call db
+		repository.findById(1); // 2nd time,  wont call db
+		session.evict(product); // removing the obect from l1 cache
+		repository.findById(1).get(); // third time, will call db
+	}
+
+
 }
